@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "nus-iss-equeue-terraform"
-    key    = "lambda/activate-pending-staff/tfstate"
+    key    = "lambda/smartSearch/tfstate"
     region = "us-east-1"
   }
 }
