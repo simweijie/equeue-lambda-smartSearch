@@ -14,7 +14,7 @@ logic_az3_cidr_block    = "10.0.224.0/20"
 # Lambda
 #----------------------------------------------------------------------------
 filename      = "code.zip"
-function_name = "activate-pending-staff"
+function_name = "smartSearch"
 handler = "index.handler"
 role_name = "iam_lambda"
 sg_name = "Lambda Security Group"
