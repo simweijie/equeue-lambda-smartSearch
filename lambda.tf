@@ -39,11 +39,14 @@ resource "aws_lambda_function" "lambda" {
   role = data.aws_iam_role.iam_lambda.arn
   runtime = var.runtime
 
-#   environment {
-#     variables = {
-#       key = "value"
-#     }
-#   }  
+  environment {
+    variables = {
+      db_name = var.db_name
+      password = var.password
+      rds_endpoint = var.rds_endpoint
+      username = var.username
+    }
+  }
   
   vpc_config {
     subnet_ids = [data.aws_subnet.logic_az1.id, data.aws_subnet.logic_az2.id, data.aws_subnet.logic_az3.id]

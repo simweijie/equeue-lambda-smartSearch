@@ -10,3 +10,8 @@ variable "handler" {}
 variable "role_name" {}
 variable "sg_name" {}
 variable "runtime" {}
+
+variable "db_name" {}
+variable "password" {}
+variable "rds_endpoint" {}
+variable "username" {}
