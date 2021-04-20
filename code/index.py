@@ -30,11 +30,15 @@ def handler(event, context):
 ## Retrieve Data
     latt1 = radians(float(event['latt']))
     longt1 = radians(float(event['longt']))
-    query = "SELECT b.id,latt,longt, count(b.id) as queue \
+    query = "SELECT now()"
+    cur.execute(query)
+    connection.commit()
+    record = cur.fetchone()
+    print(record)
+    query = "SELECT b.id,latt,longt \
         FROM Branch b, Queue q, OpeningHours op \
         WHERE b.id=q.branchId AND b.id=op.branchID \
-        AND status='Q' \
-        AND current_time- interval 16 hour between opens and closes and op.dayOfWeek=dayofweek(now()) \
+        AND current_time between opens and closes and op.dayOfWeek=dayofweek(now()) \
         GROUP BY b.id;"    
     cur.execute(query)
     connection.commit()
@@ -47,10 +51,10 @@ def handler(event, context):
         id = 0
         latt = 0
         longt = 0
-        # Distance and Queue length calculation
+        ## Distance calculation
         distanceDict = dict()
         for row in rows:
-            print("TEST {0} {1} {2} {3}".format(row[0],row[1],row[2],row[3]))
+            print("TEST {0} {1} {2}".format(row[0],row[1],row[2]))
             id = row[0]
             latt2 = radians(row[1])
             longt2 = radians(row[2])
@@ -60,18 +64,24 @@ def handler(event, context):
             print ("GEOPY DISTANCE: ", distance)
             distanceDict[id] = distance
         sorted_distanceDict = dict()
+        ## Order according to distance, shortest distance first
         sorted_keys = sorted(distanceDict, key=distanceDict.get)
         count = 1
-        for w in sorted_keys:            
-            if(row[3] > 5):
-                sorted_distanceDict[w] = count + 1
-            else:
-                sorted_distanceDict[w] = count
+        
+        for w in sorted_keys:
+            print("Dict Key Branch ID: {0}".format(w))
+            ## Queue length
+            query = "select count(*) from Queue where branchId={} and status='Q'".format(w)
+            cur.execute(query)
+            connection.commit()
+            row = cur.fetchone()
+            sorted_distanceDict[w] = count + row[0]/10
             count += 1
         bestBranch = min(sorted_distanceDict,key=sorted_distanceDict.get)
+        print("bestBranch ID = {0}".format(bestBranch))
 
-        # Distance and Queue length calculation
-        query = "SELECT b.*,count(b.id) as queue FROM Branch b, Queue q WHERE b.id=q.branchId AND b.id={} AND q.status='Q' GROUP BY b.id;".format(bestBranch)
+        # Best Branch details
+        query = "SELECT b.*,sum(q.status='Q') FROM Branch b, Queue q WHERE b.id=q.branchId AND b.id={} GROUP BY b.id".format(bestBranch)
         cur.execute(query)
         connection.commit()
         rows = cur.fetchall()
@@ -92,15 +102,6 @@ def handler(event, context):
 
 # Construct http response object
     responseObject = {}
-    # responseObject['statusCode'] = 200
-    # responseObject['headers'] = {}
-    # responseObject['headers']['Content-Type']='application/json'
-    # responseObject['headers']['Access-Control-Allow-Origin']='*'
     responseObject['data']= branchList
-    # responseObject['body'] = json.dumps(transactionResponse, sort_keys=True,default=str)
-    
-    #k = json.loads(responseObject['body'])
-    #print(k['uin'])
-
     return responseObject
 
