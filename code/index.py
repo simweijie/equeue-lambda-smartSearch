@@ -81,7 +81,7 @@ def handler(event, context):
         print("bestBranch ID = {0}".format(bestBranch))
 
         # Best Branch details
-        query = "SELECT b.*,sum(q.status='Q') FROM Branch b, Queue q WHERE b.id=q.branchId AND b.id={} GROUP BY b.id".format(bestBranch)
+        query = "SELECT b.*,sum(q.status='Q'),op.opens,op.closes FROM Branch b, Queue q, OpeningHours op WHERE b.id=q.branchId AND b.id={} AND b.id=op.branchId and op.dayOfWeek=dayofweek(now()) GROUP BY b.id;".format(bestBranch)
         cur.execute(query)
         connection.commit()
         rows = cur.fetchall()
@@ -98,6 +98,8 @@ def handler(event, context):
             transactionResponse['longt'] = row[7]
             transactionResponse['clinicId'] = row[8]
             transactionResponse['queueLength'] = row[9]
+            transactionResponse['opens']=str(row[10])
+            transactionResponse['closes']=str(row[11])
             branchList.append(transactionResponse)
 
 # Construct http response object
