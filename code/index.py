@@ -38,7 +38,7 @@ def handler(event, context):
     query = "SELECT b.id,latt,longt \
         FROM Branch b, Queue q, OpeningHours op \
         WHERE b.id=q.branchId AND b.id=op.branchID \
-        AND current_time between opens and closes and op.dayOfWeek=dayofweek(now()) \
+        AND current_time+ interval 8 hour between opens and closes and op.dayOfWeek=dayofweek(now()) \
         GROUP BY b.id;"    
     cur.execute(query)
     connection.commit()
